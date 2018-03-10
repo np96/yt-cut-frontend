@@ -13,9 +13,10 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      imgSrc : null, description: 'Temporary description',
-      meta: [], parts: [], videoId: null, 
-      selectedMeta: null, sessionId: null
+      imgSrc : null, meta: [], parts: [], 
+      videoId: null, album_name: '',
+      parts_history: {}, 
+      selected_meta: null, sessions: []
     };
   }
 
@@ -28,7 +29,7 @@ class App extends Component {
     console.log(valid);
     if (valid) {
       const videoId = valid[4];
-      fetch(`http://localhost:8080/media?youtubeHashId=${videoId}`)
+      fetch(`media?youtubeHashId=${videoId}`)
         .then(response => response.json())
         .then(response => { 
           console.log(response);
@@ -64,7 +65,7 @@ class App extends Component {
       return (<NavItem key={link.url} 
         onSelect={() => this.setState(prevState => { 
           return {...prevState, 
-            selectedMeta: link
+            selected_meta: link
           };
         })}
       >{`${link.format}/${link.quality}`}</NavItem>);
@@ -86,8 +87,27 @@ class App extends Component {
   onAddPartClick() {
     const parts = this.state.parts;
     this.setState({
-      parts: [...parts, {id: parts.length}
-      ]});
+      parts: [...parts, {id: parts.length}]
+    });
+  }
+
+  handleAlbumChange(e) {
+    console.log(`album_name: ${e.target.value}`);
+    this.setState({album_name: e.target.value});
+  }
+
+  albumName() {
+    return (
+      <form>
+        <FormGroup bsSize="large" 
+          controlId="urlControl">
+          <FormControl type="text" value={this.state.album_name}
+            placeholder="Album Name"
+            onChange={(e) => this.handleAlbumChange(e)}
+          />
+        </FormGroup>
+      </form>
+    );
   }
 
   partList() {
@@ -101,7 +121,9 @@ class App extends Component {
   onNewSession(sId) {
     console.log('onNewSesion ' + sId);
     this.setState((prevState) => {
-      return {...prevState, sessionId: sId};
+      return {...prevState, 
+        parts_history: {...prevState.parts_history, [sId]: [...prevState.parts]},
+        parts: [{id: 0}], sessions: [...prevState.sessions, sId]};
     });
     /*    fetch(`http://localhost:8080/get?${sId}`,
       { method: 'GET',
@@ -113,17 +135,17 @@ class App extends Component {
 
   onSubmitButtonClick(meta, parts) {
     const track_list = parts.map(part => (
-      { start : part['from ' + part.id],
-        duration: part['to ' + part.id],
-        album_name: part['name ' + part.id],
-        name: part['name ' + part.id]
+      { start : part['start'],
+        duration: part['duration'],
+        album_name: this.state.album_name,
+        name: part['name']
       })
     );
     const json_body = JSON.stringify({
       'tracks': track_list,
       'media': meta
     });
-    fetch('http://localhost:8080/cut?sessionId=1', 
+    fetch('cut?sessionId=1', 
       { method: 'POST', 
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
@@ -135,13 +157,24 @@ class App extends Component {
   }
 
   submitButton() {
-    const meta = this.state.selectedMeta;
+    const meta = this.state.selected_meta;
     const parts = this.state.parts;
     return (<Button onClick={() => this.onSubmitButtonClick(meta, parts)}>Convert</Button>);
   }
 
+  trackLists() {
+    console.log("Sessions: " + this.state.sessions);
+    const listView = this.state.sessions.map(sId => (
+      <li key={sId} className="list-group-item">
+        <TrackList sId={sId} parts={this.state.parts_history[sId]}/>
+      </li>
+    ));
+    return (
+      <ListGroup componentClass="ul">{listView}</ListGroup>
+    );
+  }
+
   render() {
-    console.log('Session id ' + this.state.sessionId);
     return (
       <div className="App">
         <header className="App-header">
@@ -155,21 +188,16 @@ class App extends Component {
                 <Media.Left align="middle">
                   <Image src={this.state.imgSrc} />
                 </Media.Left>
-                <Media.Body>
-                  <Media.Heading> Monolake - Indigo </Media.Heading>
-                  <p> 
-                    {this.state.description}
-                  </p>
-                </Media.Body>
               </Media>
               {this.metaList()}
+              {this.albumName()}
               {this.partList()}
               {this.submitButton()}
             </React.Fragment>
           }
-          {this.state.sessionId != null 
+          {this.state.sessions != []
             &&
-            <TrackList sId={this.state.sessionId} parts={this.state.parts}/>
+            this.trackLists()
           }
         </div>
       </div>
@@ -178,31 +206,3 @@ class App extends Component {
 }
 
 export default App;
-/*
-            <ListGroupItem bsStyle="info"><ReactAudioPlayer
-              src="autechre.mp3"
-              style={{width:'100%', height: '80%', right: 0, top: 0}}
-              controls /></ListGroupItem>
-            <ListGroupItem bsStyle="warning">Warning</ListGroupItem>
-            <ListGroupItem bsStyle="danger">Danger</ListGroupItem>
-
-            */
-
-/*            &&
-            <ListGroup componentClass="ul">
-              <li className="list-group-item">
-                <Grid>
-                  <Row>
-                    <Col xs={12} md={4}>
-                      <p>Oneohtrix Point Never — Very long pretentious track name which is very boring</p>
-                    </Col>
-                    <Col xs={12} md={8}>
-                      <ReactAudioPlayer
-                        src="https://localhost:8080/track?1"
-                        style={{width:'100%'}}
-                        controls/>
-                    </Col>
-                  </Row>
-                </Grid>
-              </li>
-            </ListGroup>*/

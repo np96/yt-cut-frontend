@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { validateTime } from '../Util';
 import { ListGroup, FormGroup, FormControl, Col, Row, Grid, Button, Form  } from 'react-bootstrap';
 
 class PartList extends Component {
@@ -26,26 +27,28 @@ class PartList extends Component {
             <Grid>
               <Row>
                 <Col xs={12} md={8}>
-                  <FormGroup controlId="trackName">
+                  <FormGroup controlId="trackName"
+                    validationState={part.name ? 'success' : 'error'}>
                     <FormControl type="text"
-                      name={'name ' + part.id}
+                      name={'name'}
                       placeholder="Track name"
                       onChange = {(e) => this.handleChange(part.id, e)} />
                   </FormGroup>
                 </Col>
                 <Col xs={6} md={2}>
-                  <FormGroup controlId="stampFrom" value={part.from}>
-                    <FormControl type="text"
-                      name={'from ' + part.id} 
-                      placeholder="From"
+                  <FormGroup controlId="start" value={part.start}
+                    validationState={validateTime(part['start']) == null ? 'error' : 'success'}>
+                    <FormControl type="text" placeholder="Start"
+                      name={'start'} 
                       onChange = {(e) => this.handleChange(part.id, e)}
                     />
                   </FormGroup>
                 </Col>
                 <Col xs={6} md={2}>
-                  <FormGroup controlId="stampTo" value={part.to}>
-                    <FormControl type="text" placeholder="To"
-                      name={'to ' + part.id}
+                  <FormGroup controlId="duration" value={part.duration}
+                    validationState={validateTime(part['duration']) == null ? 'error' : 'success'}>
+                    <FormControl type="text" placeholder="Duration"
+                      name={'duration'}
                       onChange = {(e) => this.handleChange(part.id, e)}
                     />
                   </FormGroup>

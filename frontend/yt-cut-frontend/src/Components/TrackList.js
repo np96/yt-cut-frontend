@@ -1,4 +1,4 @@
-import { ListGroup, Panel } from 'react-bootstrap';
+import { ListGroup, Panel, ProgressBar } from 'react-bootstrap';
 import React, { Component } from 'react';
 import { Track } from './Track';
 
@@ -13,15 +13,15 @@ class TrackList extends Component {
   }
 
   updateState(json) {
-    console.log("Updating Track list state " + json);
+    console.log('Updating Track list state ' + json);
     const tracks = json['tracks'];
     const est_time = 100 - json['mediaProgress'];
     const min_id = Math.min(...tracks);
     const new_state = {
       tracks: tracks.map(id => ({
-        name: this.props.parts[id - min_id]['name ' + (id - min_id)],
+        name: this.props.parts[id - min_id].name,
         id: id,
-        src: `http://localhost:8080/track?id=${id}`
+        src: `track?id=${id}`
       })),
       est_time: est_time
     };
@@ -33,24 +33,22 @@ class TrackList extends Component {
       }
     } else {
       new_state['status'] = 'Done';
+      clearInterval(this.state.timer_id);
     }
     this.setState(new_state);
   }
 
   requestState() {
-    fetch(`http://localhost:8080/get?queryId=${this.props.sId}`)
+    fetch(`/get?queryId=${this.props.sId}`)
       .then(response => response.json())
-      .then(json => setTimeout(this.updateState(json), 5000));
-  }
-
-  componentDidUpdate() {
-    if (this.state['status'] != 'Done') {
-      this.requestState();
-    }
+      .then(json => this.updateState(json));
   }
 
   componentDidMount() {
-    this.requestState();
+    if (this.state['status'] != 'Done') {
+      const timer_id = setInterval(() => this.requestState(), 2500);
+      this.setState({timer_id: timer_id});
+    }
   }
   
   render() {
@@ -65,7 +63,8 @@ class TrackList extends Component {
       <div className="app">
         <Panel bsStyle={est_time > 0 ? 'info' : 'success'}>
           <Panel.Body>
-            {est_time > 0 ? est_time: 'Converted'}
+            <ProgressBar now={100 - est_time} 
+              bsStyle={this.state['status'] == 'Done' ? 'success' : 'info'}/>
           </Panel.Body>
         </Panel>
         <ListGroup componentClass="ul">

@@ -22,7 +22,7 @@ class UrlComponent extends Component {
       <form>
         <FormGroup bsSize="large" 
           controlId="urlControl"
-          validationState={validateYouTubeUrl(url) == null ? 'warning' : 'success'}
+          validationState={validateYouTubeUrl(url) == null ? 'error' : 'success'}
         >
           <FormControl type="text" value={this.state.url} 
             placeholder="Enter YouTube URL"

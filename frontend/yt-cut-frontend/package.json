@@ -1,6 +1,7 @@
 {
   "name": "yt-cut-frontend",
   "version": "0.1.0",
+  "proxy": "http://localhost:8080",
   "private": true,
   "dependencies": {
     "bootstrap": "^3.3.7",
