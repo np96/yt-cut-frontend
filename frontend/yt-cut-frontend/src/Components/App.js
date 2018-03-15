@@ -5,7 +5,7 @@ import ReactAudioPlayer from 'react-audio-player';
 import logo from './../logo.svg';
 import UrlComponent from './UrlComponent';
 import TrackList from './TrackList.js';
-import { validateYouTubeUrl } from '../Util';
+import { validateYouTubeUrl, validateTime } from '../Util';
 import './../App.css';
 import PartList from './PartList';
 
@@ -75,7 +75,7 @@ class App extends Component {
     </Nav>);
   }
    
-  handleChange(id, e) {
+  handlePartsChange(id, e) {
     const parts = this.state.parts;
     this.setState({parts: parts.map(
       (part) => {
@@ -113,7 +113,7 @@ class App extends Component {
   partList() {
     console.log(this.state.parts);
     return (<PartList parts={this.state.parts} 
-      handleChange={(id, e) => this.handleChange(id, e)}
+      handleChange={(id, e) => this.handlePartsChange(id, e)}
       onAddPartClick={() => this.onAddPartClick()}/>
     );
   }
@@ -124,7 +124,7 @@ class App extends Component {
       return {...prevState, 
         parts_history: {...prevState.parts_history, [sId]: [...prevState.parts]},
         parts: [{id: 0}], sessions: [...prevState.sessions, sId]};
-    });
+    });//.then(() => this.setState({parts: [{id: 0}]}));
     /*    fetch(`http://localhost:8080/get?${sId}`,
       { method: 'GET',
         body: JSON.stringify({...})
@@ -150,7 +150,6 @@ class App extends Component {
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
         body: json_body
-        //      , sessionId: 1
       }
     ).then(response => response.json()
     ).then(json => this.onNewSession(json['queryId']));

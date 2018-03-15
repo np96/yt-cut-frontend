@@ -18,6 +18,10 @@ class PartList extends Component {
     this.setState({parts: p.target.value, visible: `${p.target.value.length > 0}`});
   }
 
+  componentWillUnmount() {
+    this.setState({parts: []});
+  }
+
   render() {
     console.log('render:' + this.state.parts.map(part => part.id));
     const partsView = this.state.parts.map((part) => {
@@ -30,25 +34,25 @@ class PartList extends Component {
                   <FormGroup controlId="trackName"
                     validationState={part.name ? 'success' : 'error'}>
                     <FormControl type="text"
-                      name={'name'}
+                      name='name'
                       placeholder="Track name"
                       onChange = {(e) => this.handleChange(part.id, e)} />
                   </FormGroup>
                 </Col>
                 <Col xs={6} md={2}>
-                  <FormGroup controlId="start" value={part.start}
+                  <FormGroup controlId="start" value={part.start || ''}
                     validationState={validateTime(part['start']) == null ? 'error' : 'success'}>
                     <FormControl type="text" placeholder="Start"
-                      name={'start'} 
+                      name='start'
                       onChange = {(e) => this.handleChange(part.id, e)}
                     />
                   </FormGroup>
                 </Col>
                 <Col xs={6} md={2}>
-                  <FormGroup controlId="duration" value={part.duration}
+                  <FormGroup controlId="duration" value={part.duration || ''}
                     validationState={validateTime(part['duration']) == null ? 'error' : 'success'}>
                     <FormControl type="text" placeholder="Duration"
-                      name={'duration'}
+                      name='duration'
                       onChange = {(e) => this.handleChange(part.id, e)}
                     />
                   </FormGroup>
